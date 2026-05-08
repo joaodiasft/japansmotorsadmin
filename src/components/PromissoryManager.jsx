@@ -35,14 +35,30 @@ const PromissoryManager = ({ transaction, storeData }) => {
   }
 
   const data = transaction;
-  const installmentsCount = parseInt(data.promissory.installments) || 1;
+
+  // Suporte ao formato do banco (campos diretos) e formato legado (sub-objeto promissory)
+  const promissory = data.promissory || {
+    installments: data.installments || 1,
+    installmentValue: data.installmentValue || '',
+    applyInterest: data.applyInterest || false,
+    interestRate: data.interestRate || '',
+    firstDueDate: data.firstDueDate || '',
+    payableAt: data.payableAt || '',
+    valueWords: data.valueWords || '',
+    customDates: [],
+  };
+
+  const customer = data.customer || {};
+  const customerCityUf = customer.cityUf || `${customer.city || ''}${customer.state ? ' - ' + customer.state : ''}`;
+
+  const installmentsCount = parseInt(promissory.installments) || 1;
   const promissories = Array.from({ length: installmentsCount });
 
-  let finalInstallmentValue = data.promissory.installmentValue;
-  if (data.promissory.applyInterest && data.promissory.interestRate) {
-    const baseVal = parseFloat(data.promissory.installmentValue.replace(/\./g, '').replace(',', '.'));
+  let finalInstallmentValue = promissory.installmentValue || '0,00';
+  if (promissory.applyInterest && promissory.interestRate && promissory.installmentValue) {
+    const baseVal = parseFloat((promissory.installmentValue || '').replace(/\./g, '').replace(',', '.'));
     if (!isNaN(baseVal)) {
-      const interest = parseFloat(data.promissory.interestRate);
+      const interest = parseFloat(promissory.interestRate);
       const withInterest = baseVal + (baseVal * (interest / 100));
       finalInstallmentValue = withInterest.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
@@ -53,6 +69,7 @@ const PromissoryManager = ({ transaction, storeData }) => {
   for (let i = 0; i < promissories.length; i += 2) {
     chunks.push(promissories.slice(i, i + 2));
   }
+
 
   return (
     <div className="max-w-6xl mx-auto p-4 mt-4">
@@ -73,11 +90,11 @@ const PromissoryManager = ({ transaction, storeData }) => {
               const currentInstallment = (pageIndex * 2) + chunkIdx + 1;
               
               let dueDate = '';
-              if (data.promissory.customDates && data.promissory.customDates[currentInstallment - 1]) {
-                const customDate = new Date(data.promissory.customDates[currentInstallment - 1] + 'T12:00:00');
+              if (promissory.customDates && promissory.customDates[currentInstallment - 1]) {
+                const customDate = new Date(promissory.customDates[currentInstallment - 1] + 'T12:00:00');
                 dueDate = customDate.toLocaleDateString('pt-BR');
               } else {
-                dueDate = calculateDueDate(data.promissory.firstDueDate, currentInstallment - 1);
+                dueDate = calculateDueDate(promissory.firstDueDate, currentInstallment - 1);
               }
 
               return (
@@ -137,11 +154,11 @@ const PromissoryManager = ({ transaction, storeData }) => {
                       </p>
                       
                       <div className="bg-slate-100 border border-slate-300 p-3 font-bold uppercase text-center min-h-[50px] flex items-center justify-center italic text-slate-800 rounded font-sans text-sm">
-                        {data.promissory.valueWords || '____________________________________________________________________________________'}
+                        {promissory.valueWords || '____________________________________________________________________________________'}
                       </div>
 
                       <p>
-                        Praça de Pagamento: <span className="font-bold font-sans uppercase bg-white px-3 py-1 border-b border-slate-400 text-slate-900">{data.promissory.payableAt}</span>
+                        Praça de Pagamento: <span className="font-bold font-sans uppercase bg-white px-3 py-1 border-b border-slate-400 text-slate-900">{promissory.payableAt}</span>
                       </p>
 
                       <div className="mt-8 relative">
@@ -149,15 +166,15 @@ const PromissoryManager = ({ transaction, storeData }) => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6 border border-slate-300 p-5 rounded-lg bg-white/50 font-sans text-xs">
                           <div className="md:col-span-2">
                             <span className="font-semibold text-slate-500 uppercase text-[10px]">Nome Completo</span>
-                            <div className="font-bold text-sm uppercase text-slate-800 border-b border-slate-200 pb-1">{data.customer.name}</div>
+                            <div className="font-bold text-sm uppercase text-slate-800 border-b border-slate-200 pb-1">{customer.name}</div>
                           </div>
                           <div>
                             <span className="font-semibold text-slate-500 uppercase text-[10px]">CPF / CNPJ</span>
-                            <div className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-1">{data.customer.cpf}</div>
+                            <div className="font-bold text-sm text-slate-800 border-b border-slate-200 pb-1">{customer.cpf}</div>
                           </div>
                           <div className="md:col-span-3">
                             <span className="font-semibold text-slate-500 uppercase text-[10px]">Endereço Completo</span>
-                            <div className="font-medium text-sm uppercase text-slate-800 border-b border-slate-200 pb-1">{data.customer.address}, {data.customer.neighborhood} - {data.customer.cityUf}</div>
+                            <div className="font-medium text-sm uppercase text-slate-800 border-b border-slate-200 pb-1">{customer.address}, {customer.neighborhood} - {customerCityUf}</div>
                           </div>
                         </div>
                       </div>
@@ -166,7 +183,7 @@ const PromissoryManager = ({ transaction, storeData }) => {
                     <div className="flex justify-end mt-16 mb-4">
                       <div className="w-1/2 text-center border-t-2 border-slate-800 pt-2 relative">
                         <span className="absolute -top-[30px] right-0 font-[cursive] text-2xl text-blue-900 opacity-20 pointer-events-none transform -rotate-6">Assinatura Reconhecida</span>
-                        <p className="font-bold uppercase text-sm mt-2 text-slate-900">{data.customer.name}</p>
+                        <p className="font-bold uppercase text-sm mt-2 text-slate-900">{customer.name}</p>
                         <p className="text-xs text-slate-500 font-mono tracking-wider mt-1">ASSINATURA DO EMITENTE / DEVEDOR</p>
                       </div>
                     </div>

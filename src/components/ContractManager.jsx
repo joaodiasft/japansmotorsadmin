@@ -28,11 +28,29 @@ const ContractManager = ({ transaction, storeData }) => {
   }
 
   const data = transaction;
-  const t = data.sale;
-  const c = data.customer;
-  const v = data.vehicle;
 
-  // Format numbers padStart for alignment
+  // Suporte tanto ao formato legado { sale, customer, vehicle }
+  // quanto ao formato do banco { customer, vehicle, ...campos diretos }
+  const c = data.customer || {};
+  const v = data.vehicle || {};
+
+  // Campos financeiros: podem estar no sub-objeto sale (formato legado) ou direto no objeto (banco)
+  const t = {
+    date: data.saleDate || data.sale?.date || '',
+    cashValue: data.cashValue || data.sale?.cashValue || '',
+    financedValue: data.financedValue || data.sale?.financedValue || '',
+    totalValue: data.totalValue || data.sale?.totalValue || '',
+    financeHistory: data.financeHistory || data.sale?.financeHistory || '',
+    despachanteFee: data.despachanteFee || data.sale?.despachanteFee || '0,00',
+    tacFee: data.tacFee || data.sale?.tacFee || '0,00',
+    observations: data.observations || data.sale?.observations || '',
+  };
+
+  // cityUf compatível: banco guarda city+state separados, legado usava cityUf junto
+  const customerCityUf = c.cityUf || `${c.city || ''}${c.state ? ' - ' + c.state : ''}`;
+  // fuelType compatível
+  const vehicleFuel = v.fuelType || v.fuel || '';
+
   const padVal = (val) => {
     if (!val) return '      0,00';
     return val.padStart(10, ' ');
@@ -86,7 +104,7 @@ const ContractManager = ({ transaction, storeData }) => {
               <MonoLine label="Telefone(s)" value={c.phone} />
               <MonoLine label="Endereço" value={c.address} />
               <MonoLine label="Bairro" value={c.neighborhood} />
-              <MonoLine label="Cidade - UF" value={c.cityUf} />
+              <MonoLine label="Cidade - UF" value={customerCityUf} />
               <MonoLine label="CEP" value={c.cep} />
               <MonoLine label="Identidade" value={`${c.rg} ${c.orgaoEmissor}`} />
               <MonoLine label="CPF" value={c.cpf} />
@@ -96,13 +114,14 @@ const ContractManager = ({ transaction, storeData }) => {
           <div className="mb-4">
             <p className="font-bold mb-1">® - OBJETO DO CONTRATO:</p>
             <div className="pl-4">
-              <MonoLine padLength={16} label="Veiculo " value={`${v.model} ${v.category || ''}`} />
+              <MonoLine padLength={16} label="Veiculo " value={`${v.brand || ''} ${v.model || ''}`} />
               <MonoLine padLength={16} label="Cor " value={v.color} />
-              <MonoLine padLength={16} label="Combustivel" value={v.fuel} />
+              <MonoLine padLength={16} label="Combustivel" value={vehicleFuel} />
               <MonoLine padLength={16} label="Placa " value={v.plate} />
               <MonoLine padLength={16} label="Chassis" value={v.chassis} />
               <MonoLine padLength={16} label="Ano Fab / Mod " value={v.year} />
               <MonoLine padLength={16} label="Quilometragem " value={v.mileage} />
+              <MonoLine padLength={16} label="Renavam" value={v.renavam} />
               <MonoLine padLength={16} label="Data da Venda " value={t.date} />
             </div>
           </div>
