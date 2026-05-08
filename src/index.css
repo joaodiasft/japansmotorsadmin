@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+/* Estilos Gerais do Documento A4 */
+.print-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background: #e5e7eb;
+  padding-bottom: 40px;
+  padding-top: 20px;
+}
+
+.a4-page {
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  padding: 10mm 15mm;
+  font-family: 'Courier New', Courier, monospace, Arial, sans-serif;
+  color: #000;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Print Specific Styles */
+@media print {
+  @page { 
+    size: A4 portrait; 
+    margin: 10mm 15mm; /* Margens seguras da própria impressora */
+  }
+  body { 
+    background: white; 
+    margin: 0; 
+    padding: 0; 
+    -webkit-print-color-adjust: exact !important; 
+    print-color-adjust: exact !important; 
+  }
+  .print-container { 
+    gap: 0; 
+    background: white; 
+    padding: 0; 
+    display: block; 
+  }
+  .a4-page { 
+    width: auto; 
+    height: auto; /* Nunca force 297mm no print, isso cria páginas em branco */
+    min-height: 0;
+    box-shadow: none; 
+    margin: 0; 
+    padding: 0; /* O padding agora é controlado pelo @page */
+    page-break-after: always; 
+    page-break-inside: avoid;
+  }
+  .a4-page:last-child { 
+    page-break-after: avoid; 
+  }
+  .print\:hidden { 
+    display: none !important; 
+  }
+}

@@ -1,0 +1,100 @@
+// This is your Prisma schema file
+// Japan Motors ERP — Banco Neon PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  name          String
+  cpf           String   @unique
+  rg            String?
+  orgaoEmissor  String?
+  nacionalidade String?
+  estadoCivil   String?
+  profissao     String?
+  phone         String?
+  email         String?
+  address       String?
+  neighborhood  String?
+  city          String?
+  state         String?
+  cep           String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sales Sale[]
+
+  @@map("customers")
+}
+
+model Vehicle {
+  id           String   @id @default(cuid())
+  brand        String?
+  model        String
+  year         String?
+  color        String?
+  plate        String?  @unique
+  chassis      String?  @unique
+  renavam      String?
+  mileage      String?
+  fuelType     String?
+  transmission String?
+  price        String?
+  status       String   @default("available")
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sales Sale[]
+
+  @@map("vehicles")
+}
+
+model Sale {
+  id             String   @id @default(cuid())
+  saleDate       String
+  customerId     String
+  vehicleId      String
+  totalValue     String
+  cashValue      String?
+  financedValue  String?
+  financeHistory String?
+  despachanteFee String?
+  tacFee         String?
+  observations   String?
+  templateId     String?
+
+  installments     Int?
+  installmentValue String?
+  applyInterest    Boolean @default(false)
+  interestRate     String?
+  firstDueDate     String?
+  payableAt        String?
+  valueWords       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  vehicle  Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  @@map("sales")
+}
+
+model ContractTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  content   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contract_templates")
+}
