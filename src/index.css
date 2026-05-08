@@ -44,7 +44,7 @@ body {
 @media print {
   @page { 
     size: A4 portrait; 
-    margin: 10mm 15mm; /* Margens seguras da própria impressora */
+    margin: 0;
   }
   body { 
     background: white; 
@@ -60,12 +60,12 @@ body {
     display: block; 
   }
   .a4-page { 
-    width: auto; 
-    height: auto; /* Nunca force 297mm no print, isso cria páginas em branco */
+    width: 100%;
+    height: auto;
     min-height: 0;
     box-shadow: none; 
     margin: 0; 
-    padding: 0; /* O padding agora é controlado pelo @page */
+    padding: 10mm 15mm;
     page-break-after: always; 
     page-break-inside: avoid;
   }
@@ -76,3 +76,4 @@ body {
     display: none !important; 
   }
 }
+

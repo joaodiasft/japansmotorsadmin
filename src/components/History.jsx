@@ -12,13 +12,11 @@ const History = ({ sales, onLoadSale, setActiveTab }) => {
   );
 
   const handleOpenContract = (sale) => {
-    onLoadSale(sale);
-    setActiveTab('contract_editor');
+    onLoadSale(sale, 'contract_editor');
   };
 
   const handleOpenPromissory = (sale) => {
-    onLoadSale(sale);
-    setActiveTab('promissory');
+    onLoadSale(sale, 'promissory');
   };
 
   return (

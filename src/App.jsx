@@ -166,7 +166,7 @@ const App = () => {
     }
   };
 
-  const handleLoadSale = (sale) => {
+  const handleLoadSale = (sale, targetTab = 'contract_editor') => {
     const fullSale = {
       ...sale,
       store: storeData,
@@ -182,7 +182,8 @@ const App = () => {
       }
     };
     setCurrentSale(fullSale);
-    setActiveTab('contract_editor');
+    setActiveTab(targetTab);
+
   };
 
   // ===================================================
