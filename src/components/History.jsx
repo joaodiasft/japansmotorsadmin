@@ -5,7 +5,9 @@ import { api } from '../hooks/useApi';
 const History = ({ sales, onLoadSale, setActiveTab }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filtered = sales.filter(s =>
+  const list = sales ?? [];
+
+  const filtered = list.filter(s =>
     s.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.vehicle?.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.saleDate?.includes(searchTerm)

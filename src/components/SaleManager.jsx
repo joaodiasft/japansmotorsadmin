@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, User, Car, DollarSign, CalendarClock } from 'lucide-react';
+import { parseCurrencyBR, installmentWithInterestFormula, formatCurrencyBR } from '../utils/finance.js';
 
 const calculateDueDate = (startDateStr, monthsToAdd) => {
   if (!startDateStr) return '';
@@ -78,8 +79,8 @@ const SaleManager = ({ customers, vehicles, onSaveSale }) => {
       return alert("Selecione um Cliente e um Veículo para a venda.");
     }
     
-    const customerObj = customers.find(c => c.id === selectedCustomer);
-    const vehicleObj = vehicles.find(v => v.id === selectedVehicle);
+    const customerObj = (customers ?? []).find(c => c.id === selectedCustomer);
+    const vehicleObj = (vehicles ?? []).find(v => v.id === selectedVehicle);
 
     if (!customerObj || !vehicleObj) {
       return alert('Cliente ou Veículo inválido. Recarregue a página e tente novamente.');
@@ -93,14 +94,15 @@ const SaleManager = ({ customers, vehicles, onSaveSale }) => {
     });
   };
 
-  // Calcula valor da parcela com juros para preview
+  // Pré-visualização da parcela com juros: valor × (% / 100) + (valor / parcelas)
   let finalInstallmentPreview = promissoryData.installmentValue;
-  if (promissoryData.applyInterest && promissoryData.interestRate) {
-    const baseVal = parseCurrency(promissoryData.installmentValue);
-    const rate = parseFloat(promissoryData.interestRate) || 0;
-    if (baseVal > 0 && rate > 0) {
-      const wInterest = baseVal + (baseVal * (rate / 100));
-      finalInstallmentPreview = wInterest.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (promissoryData.applyInterest && promissoryData.interestRate != null && String(promissoryData.interestRate) !== '') {
+    const n = Math.max(1, parseInt(String(promissoryData.installments), 10) || 1);
+    const f = parseCurrencyBR(saleData.financedValue);
+    const valorBase = f > 0 ? f : parseCurrencyBR(promissoryData.installmentValue) * n;
+    const rate = parseFloat(String(promissoryData.interestRate).replace(',', '.')) || 0;
+    if (valorBase > 0 && rate >= 0) {
+      finalInstallmentPreview = formatCurrencyBR(installmentWithInterestFormula(valorBase, rate, n));
     }
   }
 
@@ -114,13 +116,13 @@ const SaleManager = ({ customers, vehicles, onSaveSale }) => {
           <h3 className="text-lg font-semibold text-gray-700 flex items-center mb-4"><User className="mr-2" size={20}/> 1. Vincular Entidades</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Selecione o Comprador</label>
+              <label className="block text-sm font-bold text-gray-700 mb-1">Selecione o Cliente</label>
               <select 
                 required value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value)}
                 className="w-full border p-2 rounded bg-white"
               >
                 <option value="">-- Escolha na lista --</option>
-                {customers.map((c) => <option key={c.id} value={c.id}>{c.name} - {c.cpf}</option>)}
+                {(customers ?? []).map((c) => <option key={c.id} value={c.id}>{c.name} - {c.cpf}</option>)}
               </select>
             </div>
             <div>
@@ -130,7 +132,7 @@ const SaleManager = ({ customers, vehicles, onSaveSale }) => {
                 className="w-full border p-2 rounded bg-white"
               >
                 <option value="">-- Escolha na lista --</option>
-                {vehicles.map((v) => (
+                {(vehicles ?? []).map((v) => (
                   <option key={v.id} value={v.id}>{v.brand} {v.model} - {v.plate}</option>
                 ))}
               </select>
@@ -193,15 +195,20 @@ const SaleManager = ({ customers, vehicles, onSaveSale }) => {
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4 p-3 bg-indigo-100 rounded border border-indigo-200">
             <div className="flex items-center gap-2">
               <input type="checkbox" id="applyInterest" checked={promissoryData.applyInterest} onChange={e => setPromissoryData({...promissoryData, applyInterest: e.target.checked})} className="w-5 h-5 text-indigo-600 rounded" />
-              <label htmlFor="applyInterest" className="text-sm font-bold text-indigo-800">Aplicar Juros nas parcelas</label>
+              <label htmlFor="applyInterest" className="text-sm font-bold text-indigo-800">Aplicar juros nas parcelas</label>
             </div>
             
             {promissoryData.applyInterest && (
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <input type="number" placeholder="Taxa %" value={promissoryData.interestRate} onChange={e => setPromissoryData({...promissoryData, interestRate: e.target.value})} className="border border-indigo-300 p-1.5 rounded w-24 text-sm font-bold" />
-                <span className="text-sm font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-full border border-red-200">
-                  Total Final: R$ {finalInstallmentPreview}
-                </span>
+              <div className="flex flex-col gap-2 w-full md:flex-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <input type="number" placeholder="Taxa %" value={promissoryData.interestRate} onChange={e => setPromissoryData({...promissoryData, interestRate: e.target.value})} className="border border-indigo-300 p-1.5 rounded w-24 text-sm font-bold" />
+                  <span className="text-sm font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-full border border-red-200">
+                    Valor da parcela (com juros): R$ {finalInstallmentPreview}
+                  </span>
+                </div>
+                <p className="text-xs text-indigo-700 max-w-xl leading-relaxed">
+                  Cada parcela = (valor financiado × % de juros ÷ 100) + (valor financiado ÷ quantidade de parcelas). Se não houver valor financiado, usa-se o valor da parcela × quantidade como base.
+                </p>
               </div>
             )}
           </div>

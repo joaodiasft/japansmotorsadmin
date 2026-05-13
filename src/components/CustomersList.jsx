@@ -42,7 +42,7 @@ const CustomersList = ({ customers, setCustomers }) => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-100 text-gray-600 uppercase text-xs">
-                <th className="p-4 font-semibold">Nome Compledo</th>
+                <th className="p-4 font-semibold">Nome Completo</th>
                 <th className="p-4 font-semibold">CPF</th>
                 <th className="p-4 font-semibold">Telefone</th>
                 <th className="p-4 font-semibold">Cidade</th>

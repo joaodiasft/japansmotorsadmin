@@ -15,7 +15,7 @@ const CustomerManager = ({ customers, onSave, onDelete }) => {
 
   const [formData, setFormData] = useState(initialForm);
 
-  const filteredCustomers = customers.filter(c =>
+  const filteredCustomers = (customers ?? []).filter(c =>
     c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.cpf?.includes(searchTerm)
   );
@@ -85,8 +85,11 @@ const CustomerManager = ({ customers, onSave, onDelete }) => {
             <label className="block text-sm font-bold text-gray-700 mb-1">Estado Civil</label>
             <select name="estadoCivil" value={formData.estadoCivil || ''} onChange={handleChange} className="w-full border p-2 rounded bg-white">
               <option value="">-- Selecione --</option>
-              <option>Solteiro(a)</option><option>Casado(a)</option>
-              <option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option>
+              <option value="Solteiro(a)">Solteiro(a)</option>
+              <option value="Casado(a)">Casado(a)</option>
+              <option value="Divorciado(a)">Divorciado(a)</option>
+              <option value="Viúvo(a)">Viúvo(a)</option>
+              <option value="União Estável">União Estável</option>
             </select>
           </div>
 

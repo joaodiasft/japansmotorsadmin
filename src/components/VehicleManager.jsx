@@ -21,7 +21,7 @@ const VehicleManager = ({ vehicles, onSave, onDelete }) => {
 
   const [formData, setFormData] = useState(initialForm);
 
-  const filteredVehicles = vehicles.filter(v => {
+  const filteredVehicles = (vehicles ?? []).filter(v => {
     const label = `${v.brand} ${v.model}`.toLowerCase();
     const matchSearch = label.includes(searchTerm.toLowerCase()) || v.plate?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = filterStatus === 'ALL' || v.status === filterStatus;

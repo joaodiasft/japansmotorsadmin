@@ -4,6 +4,7 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -31,7 +32,7 @@ body {
   width: 210mm;
   min-height: 297mm;
   background: white;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   padding: 10mm 15mm;
   font-family: 'Courier New', Courier, monospace, Arial, sans-serif;
   color: #000;
@@ -42,38 +43,42 @@ body {
 
 /* Print Specific Styles */
 @media print {
-  @page { 
-    size: A4 portrait; 
+  @page {
+    size: A4 portrait;
     margin: 0;
   }
-  body { 
-    background: white; 
-    margin: 0; 
-    padding: 0; 
-    -webkit-print-color-adjust: exact !important; 
-    print-color-adjust: exact !important; 
+
+  body {
+    background: white;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  .print-container { 
-    gap: 0; 
-    background: white; 
-    padding: 0; 
-    display: block; 
+
+  .print-container {
+    gap: 0;
+    background: white;
+    padding: 0;
+    display: block;
   }
-  .a4-page { 
+
+  .a4-page {
     width: 100%;
     height: auto;
     min-height: 0;
-    box-shadow: none; 
-    margin: 0; 
+    box-shadow: none;
+    margin: 0;
     padding: 10mm 15mm;
-    page-break-after: always; 
+    page-break-after: always;
     page-break-inside: avoid;
   }
-  .a4-page:last-child { 
-    page-break-after: avoid; 
+
+  .a4-page:last-child {
+    page-break-after: avoid;
   }
-  .print\:hidden { 
-    display: none !important; 
+
+  .print\:hidden {
+    display: none !important;
   }
 }
-

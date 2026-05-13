@@ -12,7 +12,7 @@ import { api } from './hooks/useApi';
 
 const storeData = {
   name: 'JAPAN MOTORS',
-  cnpj: '00.000.000/0001-00',
+  cnpj: '29421893000120',
   address: 'Av. Contorno, QD35 - LT 01 - Jardim Colorado',
   cityUf: 'Goiânia-GO',
   cep: '74474-048',
@@ -46,10 +46,10 @@ const App = () => {
         api.get('/sales'),
         api.get('/templates'),
       ]);
-      setCustomers(c);
-      setVehicles(v);
-      setSales(s);
-      setTemplates(t);
+      setCustomers(Array.isArray(c) ? c : []);
+      setVehicles(Array.isArray(v) ? v : []);
+      setSales(Array.isArray(s) ? s : []);
+      setTemplates(Array.isArray(t) ? t : []);
     } catch (e) {
       setApiError(`Erro ao conectar com o servidor: ${e.message}. Verifique se o backend está rodando (npm run server).`);
     } finally {
@@ -257,7 +257,13 @@ const App = () => {
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="flex-1">
         {activeTab === 'home' && (
-          <Home setActiveTab={setActiveTab} stats={stats} />
+          <Home
+            setActiveTab={setActiveTab}
+            stats={stats}
+            handleNewSale={() => setActiveTab('sale')}
+            isSaleActive={!!currentSale}
+            isViewOnly={false}
+          />
         )}
         {activeTab === 'customers' && (
           <CustomerManager
@@ -284,8 +290,6 @@ const App = () => {
           <ContractManager
             transaction={currentSale}
             storeData={storeData}
-            templates={templates}
-            setTemplates={setTemplates}
           />
         )}
         {activeTab === 'promissory' && (

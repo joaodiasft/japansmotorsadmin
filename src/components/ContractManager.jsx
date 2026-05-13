@@ -1,8 +1,13 @@
 import React from 'react';
 import { Printer, AlertCircle } from 'lucide-react';
 
+/** Título do cabeçalho do contrato (texto fixo solicitado; não usar tradução nem montagem dinâmica). */
+const CONTRACT_HEADER_TITLE =
+  'JAPAN MOTORS - Av. Contorno, QD35 - LT 01 - Jardim Colorado - Goiânia-GO-CEP: 74474-048 - CNPJ : 29421893000120';
+
 const padLabel = (label, length) => {
-  return (label + '....................').substring(0, length) + ':';
+  const base = String(label ?? '') + '....................';
+  return base.substring(0, length) + ':';
 };
 
 const MonoLine = ({ label, value, padLength = 15 }) => (
@@ -52,8 +57,9 @@ const ContractManager = ({ transaction, storeData }) => {
   const vehicleFuel = v.fuelType || v.fuel || '';
 
   const padVal = (val) => {
-    if (!val) return '      0,00';
-    return val.padStart(10, ' ');
+    const s = val != null && val !== '' ? String(val) : '';
+    if (!s) return '      0,00';
+    return s.padStart(10, ' ');
   };
 
   const HeaderInfo = () => (
@@ -61,10 +67,8 @@ const ContractManager = ({ transaction, storeData }) => {
       <div className="w-40 h-20 mr-4 flex flex-col items-center justify-center relative overflow-hidden">
         <img src="https://i.im.ge/eJ704X/sss.png" alt="Logo" className="w-full h-full object-contain" />
       </div>
-      <div className="flex-1 text-center flex flex-col justify-center text-[12px] font-bold leading-tight font-sans">
-        <p className="text-base uppercase">{storeData.name}</p>
-        <p>{storeData.address} - {storeData.cityUf}</p>
-        <p>CEP: {storeData.cep} - CNPJ: {storeData.cnpj}</p>
+      <div className="flex-1 text-center flex flex-col justify-center text-[11px] font-bold leading-snug font-sans px-1">
+        <p className="uppercase tracking-tight">{CONTRACT_HEADER_TITLE}</p>
       </div>
     </div>
   );
@@ -82,15 +86,15 @@ const ContractManager = ({ transaction, storeData }) => {
       </div>
 
       <div className="print-container font-mono text-[11px] text-black">
-        
+
         {/* ================= PAGE 1 ================= */}
         <div className="a4-page bg-white flex flex-col">
           <HeaderInfo />
-          
+
           <h2 className="text-center font-bold text-[13px] mb-3 uppercase mt-1">CONTRATO DE VENDA</h2>
-          
+
           <p className="leading-[1.15] text-justify mb-3">
-            Pelo presente instrumento particular de compra e venda de veiculos, os abaixos qualificados como 'VENDEDORA' e 'COMPRADOR', na forma do direito, tem justo e contratado a compra e venda do veiculo adiante caracterizado, mediante os termos e condições das seguintes cláusulas:
+            {`Pelo presente instrumento particular de compra e venda de veículos, os abaixo qualificados como 'VENDEDORA' e 'COMPRADOR', na forma do direito, têm entre si justo e contratado a compra e venda do veículo adiante caracterizado, mediante os termos e condições das seguintes cláusulas:`}
           </p>
 
           <p className="leading-[1.15] text-justify mb-3">
@@ -106,7 +110,7 @@ const ContractManager = ({ transaction, storeData }) => {
               <MonoLine label="Bairro" value={c.neighborhood} />
               <MonoLine label="Cidade - UF" value={customerCityUf} />
               <MonoLine label="CEP" value={c.cep} />
-              <MonoLine label="Identidade" value={`${c.rg} ${c.orgaoEmissor}`} />
+              <MonoLine label="Identidade" value={`${[c.rg, c.orgaoEmissor].filter(Boolean).join(' ')}`} />
               <MonoLine label="CPF" value={c.cpf} />
             </div>
           </div>
@@ -114,9 +118,9 @@ const ContractManager = ({ transaction, storeData }) => {
           <div className="mb-4">
             <p className="font-bold mb-1">® - OBJETO DO CONTRATO:</p>
             <div className="pl-4">
-              <MonoLine padLength={16} label="Veiculo " value={`${v.brand || ''} ${v.model || ''}`} />
+              <MonoLine padLength={16} label="Veículo " value={`${v.brand || ''} ${v.model || ''}`} />
               <MonoLine padLength={16} label="Cor " value={v.color} />
-              <MonoLine padLength={16} label="Combustivel" value={vehicleFuel} />
+              <MonoLine padLength={16} label="Combustível" value={vehicleFuel} />
               <MonoLine padLength={16} label="Placa " value={v.plate} />
               <MonoLine padLength={16} label="Chassis" value={v.chassis} />
               <MonoLine padLength={16} label="Ano Fab / Mod " value={v.year} />
@@ -153,11 +157,11 @@ const ContractManager = ({ transaction, storeData }) => {
           </div>
 
           <p className="leading-[1.15] text-justify mb-2">
-            ® - Ocorrendo o pagamento de parte do valor do bem ora adquirido, através de veiculo de menor valor, responderá o COMPRADOR civil e criminalmente por sua procedência e/ou pendências por ventura existentes, pelas multas em aberto que incidirem sobre o aludido veiculo até a data da sua efetiva entrega à VENDEDORA, e ainda evicção de direitos. Condições estas que serão igualmente impostas à VENDEDORA em relação ao seu produto.
+            ® - Ocorrendo o pagamento de parte do valor do bem ora adquirido, através de veículo de menor valor, responderá o COMPRADOR civil e criminalmente por sua procedência e/ou pendências por ventura existentes, pelas multas em aberto que incidirem sobre o aludido veículo até a data da sua efetiva entrega à VENDEDORA, e ainda evicção de direitos. Condições estas que serão igualmente impostas à VENDEDORA em relação ao seu produto.
           </p>
 
           <p className="leading-[1.15] text-justify mb-2">
-            ® - O COMPRADOR declara neste ato que examinou criteriosamente o veiculo objeto deste em todos os seus itens e componentes, verificando o motor, lataria e o estado geral do mesmo, razão pela qual o adquire no estado em que se apresenta, não se responsabilizando a VENDEDORA por eventuais alterações no velocimetro realizadas pelos antigos proprietários, ficando facultado ao COMPRADO contratar empresa especializada para verificar tal hipótese antes de concretizar o negócio, sob pena de perda do direito de reclamação em momento posterior.
+            ® - O COMPRADOR declara neste ato que examinou criteriosamente o veículo objeto deste em todos os seus itens e componentes, verificando o motor, lataria e o estado geral do mesmo, razão pela qual o adquire no estado em que se apresenta, não se responsabilizando a VENDEDORA por eventuais alterações no velocímetro realizadas pelos antigos proprietários, ficando facultado ao COMPRADOR contratar empresa especializada para verificar tal hipótese antes de concretizar o negócio, sob pena de perda do direito de reclamação em momento posterior.
           </p>
 
           <p className="leading-[1.15] text-justify mb-2">
@@ -173,18 +177,18 @@ const ContractManager = ({ transaction, storeData }) => {
         {/* ================= PAGE 2 ================= */}
         <div className="a4-page bg-white flex flex-col">
           <HeaderInfo />
-          
+
           <p className="leading-[1.15] text-justify mb-2 mt-4">
-            <b>GARANTIA</b> - O COMPRADOR(A) concorda e está ciente que a garantia do veículo é apenas de <b>MOTOR E CÂMBIO</b> com duração de <b>90 dias</b> ® - O presente contrato estabelece as condições necessárias e indispensáveis à concessão de garantia em veículos semi-novos da <b>{storeData.name}</b> e regerá-se pelos seguintes termos:<br/>
-            1. A garantia abrange somente o veiculo especificado neste contrato. 2. Por se tratar de veiculo semi-novo, a garantia se estente exclusivamente a defeitos de motor e caixa de câmbio, ficando excluidos os defeitos decorrentes de desgaste natural das demais peças. 3. Sendo veiculo adquirido na <b>{storeData.name}</b> e estando enquadrado nas condições da cláusula anterior, ser lhe-á prestado atendimento nas oficinas credenciadas a esta, mediante autorização expressa por orçamento. 4. A garantia dos itens constantes prevista no termo 2, atendidos os requisitos deste contrato contará a partir da efetiva data de entrega do veiculo e vigorará por 90(noventa) dias, sem prejuizo das prescrições contidas nos artigos 18/24 do Código de Defesa do Consumidor. 5. Com relação à quilometragem do veiculo, fica o COMPRADOR autorizado a auferi-la e constatar se existe fraude ou não. No silêncio do mesmo fica a <b>{storeData.name}</b> isenta de futuras responsabilidades. 6.As peças substituídas na vigência da garantia, quando necessário, passarão a pertencer à <b>{storeData.name}</b>. 7. A substituição do motor e/ou caixa de câmbio, somente será considerada na impossibilidade total de seu conserto.
+            <b>GARANTIA</b> - O COMPRADOR(A) concorda e está ciente que a garantia do veículo é apenas de <b>MOTOR E CÂMBIO</b> com duração de <b>90 dias</b> ® - O presente contrato estabelece as condições necessárias e indispensáveis à concessão de garantia em veículos semi-novos da <b>{storeData.name}</b> e regerá-se pelos seguintes termos:<br />
+            1. A garantia abrange somente o veículo especificado neste contrato. 2. Por se tratar de veículo semi-novo, a garantia se estente exclusivamente a defeitos de motor e caixa de câmbio, ficando excluidos os defeitos decorrentes de desgaste natural das demais peças. 3. Sendo veículo adquirido na <b>{storeData.name}</b> e estando enquadrado nas condições da cláusula anterior, ser lhe-á prestado atendimento nas oficinas credenciadas a esta, mediante autorização expressa por orçamento. 4. A garantia dos itens constantes prevista no termo 2, atendidos os requisitos deste contrato contará a partir da efetiva data de entrega do veículo e vigorará por 90(noventa) dias, sem prejuizo das prescrições contidas nos artigos 18/24 do Código de Defesa do Consumidor. 5. Com relação à quilometragem do veículo, fica o COMPRADOR autorizado a auferi-la e constatar se existe fraude ou não. No silêncio do mesmo fica a <b>{storeData.name}</b> isenta de futuras responsabilidades. 6.As peças substituídas na vigência da garantia, quando necessário, passarão a pertencer à <b>{storeData.name}</b>. 7. A substituição do motor e/ou caixa de câmbio, somente será considerada na impossibilidade total de seu conserto.
           </p>
 
           <p className="leading-[1.15] text-justify mb-2">
-            <b>® - São condições indispensáveis e obrigatórias para efetivação da garantia:</b><br/>
-            8.1. Que a reclamação seja feita diretamente na <b>{storeData.name}</b> com endereço na <b>{storeData.address}, {storeData.cityUf}</b>.<br/>
-            8.2. Que os defeitos não sejam resultantes de desgastes natural de peças mesmo que anteriores à data da venda, pois no ato do recebimento do veiculo, o cliente atesta que o mesmo se encontra em plenas condições de funcionamento.<br/>
-            8.3. Que os defeitos, não sejam resultantes ainda, de prolongado desuso, utilização inadequada, acidentes de qualquer natureza e casos fortuitos ou de força maior.<br/>
-            8.4. Que sejam atendidas as orientações e recomendações sobre uso, proteção, manutenção e conservação do veiculo, contidas no manual de instruções do fabricante, o qual passa a fazer parte integrante deste.
+            <b>® - São condições indispensáveis e obrigatórias para efetivação da garantia:</b><br />
+            8.1. Que a reclamação seja feita diretamente na <b>{storeData.name}</b> com endereço na <b>{storeData.address}, {storeData.cityUf}</b>.<br />
+            8.2. Que os defeitos não sejam resultantes de desgastes natural de peças mesmo que anteriores à data da venda, pois no ato do recebimento do veículo, o cliente atesta que o mesmo se encontra em plenas condições de funcionamento.<br />
+            8.3. Que os defeitos, não sejam resultantes ainda, de prolongado desuso, utilização inadequada, acidentes de qualquer natureza e casos fortuitos ou de força maior.<br />
+            8.4. Que sejam atendidas as orientações e recomendações sobre uso, proteção, manutenção e conservação do veículo, contidas no manual de instruções do fabricante, o qual passa a fazer parte integrante deste.
           </p>
 
           <p className="font-bold mb-1">
@@ -192,7 +196,7 @@ const ContractManager = ({ transaction, storeData }) => {
           </p>
 
           <p className="leading-[1.15] text-justify mb-2">
-            <b>G.1</b> - Após a retirada do veículo do pátio da VENDEDORA, o COMPRADOR fica responsável por todos efeitos civis ou criminais, assim como multas de trânsito, débitos fiscais e outros que forem constatados com relação ao veiculo objeto deste contrato, ficando excluidos da garantia todos os itens e peças cujo problema é considerado pelo fabricante, decorrente de desgaste natural e que devem ser substituidos periodicamente: anéis sincronizadores, disco e pastilha de freios, velas, cabo de vela, bobina de ignição, vela aquecedora, kit embreagem (platô, disco, rolamento e atuadores da embreagem), volante do motor, injetor (bicos injetores), sensores em geral, retentores do motor, anéis de vedação, correia dentada, tensor da correia, correias de acessórios, rolamentos de roda, bateria, alternador, motor de partida, injeção eletrônica, bomba injetora de bicos, maquina de vidro elétrica e manual, contrapinos, elementos filtrantes/filtros, velas de ignição, lonas de freios, ar condicionado, escapamento, aditivo do liquido do radiador e fluidos e rolamentos do motor, anel de vedação do bujão de escoamento do óleo do motor, coletor de escape, catalisador, coifas (guarda pó), molas, sistema elétrico, amortecedores, batentes, terminais de direção, pivô de suspensão, bieletas da barra estabilizadora, barra axial da direção, coxim motor/cambio, mangueiras em geral, corpo borboleta, válvula VVT, atuadores em geral, válvula EGR, carcaça e flange da válvula termostática, tampas de válvulas, pescador de óleo, chave seletora da marcha, trizetas, tulipa, retentores em geral (câmbio e motor), coluna de direção, buchas em geral, estofamento e alinhamento de rodas. Fazem parte de exclusão todos os materiais de consumo, tais como: óleos lubrificantes, travas para filtro de combustivel, liquidos de arrefecimento, filtros, bateria, guarnições, anéis, parafusos, lâmpadas, todos itens em plástico e borracha, alarme em geral, conversão para gás, airbag e sistema de navegador (GPS). Serão ainda excluidos quaisquer tipos de perdas de liquidos (óleo, água entre outros), ruidos diversos e desgastes originários de peças de reposição.
+            <b>G.1</b> - Após a retirada do veículo do pátio da VENDEDORA, o COMPRADOR fica responsável por todos efeitos civis ou criminais, assim como multas de trânsito, débitos fiscais e outros que forem constatados com relação ao veículo objeto deste contrato, ficando excluidos da garantia todos os itens e peças cujo problema é considerado pelo fabricante, decorrente de desgaste natural e que devem ser substituidos periodicamente: anéis sincronizadores, disco e pastilha de freios, velas, cabo de vela, bobina de ignição, vela aquecedora, kit embreagem (platô, disco, rolamento e atuadores da embreagem), volante do motor, injetor (bicos injetores), sensores em geral, retentores do motor, anéis de vedação, correia dentada, tensor da correia, correias de acessórios, rolamentos de roda, bateria, alternador, motor de partida, injeção eletrônica, bomba injetora de bicos, maquina de vidro elétrica e manual, contrapinos, elementos filtrantes/filtros, velas de ignição, lonas de freios, ar condicionado, escapamento, aditivo do liquido do radiador e fluidos e rolamentos do motor, anel de vedação do bujão de escoamento do óleo do motor, coletor de escape, catalisador, coifas (guarda pó), molas, sistema elétrico, amortecedores, batentes, terminais de direção, pivô de suspensão, bieletas da barra estabilizadora, barra axial da direção, coxim motor/cambio, mangueiras em geral, corpo borboleta, válvula VVT, atuadores em geral, válvula EGR, carcaça e flange da válvula termostática, tampas de válvulas, pescador de óleo, chave seletora da marcha, trizetas, tulipa, retentores em geral (câmbio e motor), coluna de direção, buchas em geral, estofamento e alinhamento de rodas. Fazem parte de exclusão todos os materiais de consumo, tais como: óleos lubrificantes, travas para filtro de combustivel, liquidos de arrefecimento, filtros, bateria, guarnições, anéis, parafusos, lâmpadas, todos itens em plástico e borracha, alarme em geral, conversão para gás, airbag e sistema de navegador (GPS). Serão ainda excluidos quaisquer tipos de perdas de liquidos (óleo, água entre outros), ruidos diversos e desgastes originários de peças de reposição.
           </p>
         </div>
 
@@ -202,7 +206,7 @@ const ContractManager = ({ transaction, storeData }) => {
           <HeaderInfo />
 
           <p className="leading-[1.15] text-justify mb-2 mt-4">
-            <b>G.2</b> - A presente garantia se restringe ao veiculo e suas peças de motor e caixa de câmbio, não cobrindo quaisquer outras repercussões, mesmo quando decorrentes de avaria ou defeitos no veiculo, tais como: 1. Despesas de transportes. 2. Imobilização do veiculo. 3. Hospedagem. 4. Socorro de Guincho. 5. Pelo decurso de validade. 6. Quando forem executadas as alterações ou modificações no veiculo ou qualquer de seus componentes, por oficina mecânica diversa da indicada pela <b>{storeData.name}</b>. 7. Quando ocorrer danos decorrentes de mau uso comprovado ou falta de manutenção adequada. 8. Não há garantia de pintura. 9. Para fins de comprovação o cliente declara ter vistoriado a pintura do veiculo mencionado neste contrato, atestando que a mesma se encontra em boas condições, considerando-se a particularidade de não se tratar de veiculo novo.
+            <b>G.2</b> - A presente garantia se restringe ao veículo e suas peças de motor e caixa de câmbio, não cobrindo quaisquer outras repercussões, mesmo quando decorrentes de avaria ou defeitos no veículo, tais como: 1. Despesas de transportes. 2. Imobilização do veículo. 3. Hospedagem. 4. Socorro de Guincho. 5. Pelo decurso de validade. 6. Quando forem executadas as alterações ou modificações no veículo ou qualquer de seus componentes, por oficina mecânica diversa da indicada pela <b>{storeData.name}</b>. 7. Quando ocorrer danos decorrentes de mau uso comprovado ou falta de manutenção adequada. 8. Não há garantia de pintura. 9. Para fins de comprovação o cliente declara ter vistoriado a pintura do veículo mencionado neste contrato, atestando que a mesma se encontra em boas condições, considerando-se a particularidade de não se tratar de veículo novo.
           </p>
 
           <p className="leading-[1.15] text-justify mb-2">
@@ -214,15 +218,15 @@ const ContractManager = ({ transaction, storeData }) => {
           </p>
 
           <p className="leading-[1.15] text-justify mb-2">
-            <b>®</b> - Na hipótese do COMPRADOR depositar ou transferir quantia a título de sinal de negócio, fica a VENDEDORA obrigada a reservar o veiculo objeto da negociação por apenas 48 (quarenta e oito) horas, ou pelo prazo combinado com o VENDEDOR, e, uma vez frustrado o negócio pelo COMPRADOR - independente do motivo - o valor correspondente a 100% (cem por cento) do sinal será retido pela vendedora em caráter de compensação material.<br/>
-            
-            <b>®</b> - Tratando-se de venda com entrega futura, o prazo acima ajustado poderá ser automaticamente prorrogado por até mais 20 (vinte) dias úteis quando se verificar atraso por comprovada culpa dos fornecedores ou por motivos de força maior não provocados pela a VENDEDORA e ainda na ocorrência de casos fortuitos como: greves no setor correlato, fenômenos naturais que possam comprometer ou inviabilizar o regular transporte do produto até o local de entrega, ocorrência de sinistros em transportes e outros.<br/>
-            
-            <b>®</b> - Verificando-se atraso na entrega do bem por culpa exclusiva do COMPRADOR, entendendo como tais motivos, mais não exclusivamente: a falta de pagamento do total do preço do bem, ou parcial quando financiado, conforme ajustado na cláusula 'D', falta de fornecimento de documentos a cargo do COMPRADOR sujeito à pena contratual neste pactuada.<br/>
-            
-            <b>® - Na hipótese da venda ser realizada com prestações futuras ou ainda fique algum compromisso financeiro residual a vencer, pelo valor total ou parcial da venda, representada por qualquer tipo de documento (boleto, cheque, nota promissória, termo de confissão de dívida, dentre outros), poderá a VENDEDORA independente de notificação prévia, e, ainda que já tenha sido realizada a transferência do veiculo, REALIZAR COMUNICADO DE VENDA JUNTO AO DETRAN EM nome da VENDEDORA, persistindo todas suas conseqüências de estilo até que o pagamento integral do débito seja realizado pelo COMPRADOR.</b><br/>
-            
-            <b>M.1</b> - Para demonstrar sua ciência e autorização inequívoca quanto ao comunicado de venda contida no item ''M'', assim como pela condição de garantia do item 8.5, ''G'', quanto a exigência da troca do óleo do motor e filtro de óleo antes de completar 500(quinhentos) quilometros rodados após a retirada do veículo do pátio para concessão de garantia, mediante a apresentação de nota fiscal do serviço, o COMPRADOR, assinará por extenso o campo abaixo, concordando com todas as consequências de estilo que foram devidamente explicadas pela VENDEDORA no ato da compra, para que no futuro não possa ser alegado ignorância e/ou desconhecimento a respeito desta providência.<br/>
+            <b>®</b> - Na hipótese do COMPRADOR depositar ou transferir quantia a título de sinal de negócio, fica a VENDEDORA obrigada a reservar o veículo objeto da negociação por apenas 48 (quarenta e oito) horas, ou pelo prazo combinado com o VENDEDOR, e, uma vez frustrado o negócio pelo COMPRADOR - independente do motivo - o valor correspondente a 100% (cem por cento) do sinal será retido pela vendedora em caráter de compensação material.<br />
+
+            <b>®</b> - Tratando-se de venda com entrega futura, o prazo acima ajustado poderá ser automaticamente prorrogado por até mais 20 (vinte) dias úteis quando se verificar atraso por comprovada culpa dos fornecedores ou por motivos de força maior não provocados pela a VENDEDORA e ainda na ocorrência de casos fortuitos como: greves no setor correlato, fenômenos naturais que possam comprometer ou inviabilizar o regular transporte do produto até o local de entrega, ocorrência de sinistros em transportes e outros.<br />
+
+            <b>®</b> - Verificando-se atraso na entrega do bem por culpa exclusiva do COMPRADOR, entendendo como tais motivos, mais não exclusivamente: a falta de pagamento do total do preço do bem, ou parcial quando financiado, conforme ajustado na cláusula 'D', falta de fornecimento de documentos a cargo do COMPRADOR sujeito à pena contratual neste pactuada.<br />
+
+            <b>® - Na hipótese da venda ser realizada com prestações futuras ou ainda fique algum compromisso financeiro residual a vencer, pelo valor total ou parcial da venda, representada por qualquer tipo de documento (boleto, cheque, nota promissória, termo de confissão de dívida, dentre outros), poderá a VENDEDORA independente de notificação prévia, e, ainda que já tenha sido realizada a transferência do veículo, REALIZAR COMUNICADO DE VENDA JUNTO AO DETRAN EM nome da VENDEDORA, persistindo todas suas conseqüências de estilo até que o pagamento integral do débito seja realizado pelo COMPRADOR.</b><br />
+
+            <b>M.1</b> - Para demonstrar sua ciência e autorização inequívoca quanto ao comunicado de venda contida no item ''M'', assim como pela condição de garantia do item 8.5, ''G'', quanto a exigência da troca do óleo do motor e filtro de óleo antes de completar 500(quinhentos) quilometros rodados após a retirada do veículo do pátio para concessão de garantia, mediante a apresentação de nota fiscal do serviço, o COMPRADOR, assinará por extenso o campo abaixo, concordando com todas as consequências de estilo que foram devidamente explicadas pela VENDEDORA no ato da compra, para que no futuro não possa ser alegado ignorância e/ou desconhecimento a respeito desta providência.<br />
             Nome: _______________________________________________________ / CPF: ____________________
           </p>
 
@@ -237,7 +241,7 @@ const ContractManager = ({ transaction, storeData }) => {
           )}
 
           <p className="leading-[1.15] text-justify mt-4 uppercase">
-            GOIÂNIA, {t.date} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute:'2-digit' })} horas.
+            GOIÂNIA, {t.date} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} horas.
           </p>
         </div>
 
@@ -245,21 +249,21 @@ const ContractManager = ({ transaction, storeData }) => {
         {/* ================= PAGE 4 - SIGNATURES ================= */}
         <div className="a4-page bg-white flex flex-col">
           <HeaderInfo />
-          
+
           <div className="mt-8 px-8 flex justify-between items-start">
             <div className="w-[45%]">
               <div className="border-b border-black mb-1 h-20 flex items-end font-[cursive] text-lg text-blue-800"></div>
               <p className="font-bold uppercase text-[12px]">{c.name}</p>
               <p className="text-[12px]">CPF/CNPJ: {c.cpf}</p>
             </div>
-            
+
             <div className="w-[45%]">
               <div className="border-b border-black mb-1 h-20 flex items-end font-[cursive] text-lg text-blue-800"></div>
               <p className="font-bold uppercase text-[12px]">{storeData.name}</p>
               <p className="text-[12px]">CNPJ: {storeData.cnpj}</p>
             </div>
           </div>
-          
+
         </div>
       </div>
     </div>

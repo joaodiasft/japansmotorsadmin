@@ -4,6 +4,19 @@ import { prisma } from '../db.js';
 
 const router = Router();
 
+const CUSTOMER_FIELDS = [
+  'name', 'cpf', 'rg', 'orgaoEmissor', 'nacionalidade', 'estadoCivil', 'profissao',
+  'phone', 'email', 'address', 'neighborhood', 'city', 'state', 'cep',
+];
+
+function pickCustomer(body) {
+  const out = {};
+  for (const k of CUSTOMER_FIELDS) {
+    if (body[k] !== undefined) out[k] = body[k];
+  }
+  return out;
+}
+
 // GET /api/customers — Lista todos
 router.get('/', async (req, res) => {
   try {
@@ -19,7 +32,7 @@ router.get('/', async (req, res) => {
 // POST /api/customers — Cria novo
 router.post('/', async (req, res) => {
   try {
-    const data = req.body;
+    const data = pickCustomer(req.body);
     const customer = await prisma.customer.create({ data });
     res.status(201).json(customer);
   } catch (e) {
@@ -34,10 +47,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const data = req.body;
-    delete data.id;
-    delete data.createdAt;
-    delete data.updatedAt;
+    const data = pickCustomer(req.body);
     const customer = await prisma.customer.update({ where: { id }, data });
     res.json(customer);
   } catch (e) {

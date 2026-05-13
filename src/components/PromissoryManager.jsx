@@ -1,5 +1,6 @@
 import React from 'react';
 import { Printer, AlertCircle } from 'lucide-react';
+import { parseCurrencyBR, installmentWithInterestFormula, formatCurrencyBR } from '../utils/finance.js';
 
 /* ─────────────────────────────────────────────
    Calcula data de vencimento dado mês de offset
@@ -23,8 +24,27 @@ const calcDue = (startStr, offset) => {
 /* ─────────────────────────────────────────────
    Promissória individual — compacta para 4/A4
 ───────────────────────────────────────────── */
-const PromissoryNote = ({ idx, total, dueDate, value, valueWords, payableAt, customer, storeData }) => {
+const PromissoryNote = ({
+  idx,
+  total,
+  dueDate,
+  value,
+  valueWords,
+  payableAt,
+  customer,
+  storeData,
+  vehicle,
+  saleDate,
+  totalValue,
+  financedValue,
+  financeHistory,
+}) => {
   const customerCityUf = customer.cityUf || `${customer.city || ''}${customer.state ? '/' + customer.state : ''}`;
+
+  const vehicleDesc = [vehicle.brand, vehicle.model].filter(Boolean).join(' ').trim() || '—';
+  const plate = vehicle.plate || '—';
+  const chassis = vehicle.chassis || '—';
+  const year = vehicle.year || '—';
 
   return (
     <div className="prom-note">
@@ -73,6 +93,22 @@ const PromissoryNote = ({ idx, total, dueDate, value, valueWords, payableAt, cus
             <b>{storeData.name}</b>, ou à sua ordem, a quantia de:
           </p>
           <div className="prom-extenso">{valueWords || '________________________________________________________'}</div>
+
+          <div className="prom-referencia">
+            <span className="prom-ref-title">Referente à compra</span>
+            <span className="prom-ref-line">
+              Cliente: <b>{customer.name || '—'}</b> — CPF/CNPJ: <b>{customer.cpf || '—'}</b>
+              {customer.phone ? <> — Tel.: <b>{customer.phone}</b></> : null}
+            </span>
+            <span className="prom-ref-line">
+              Veículo: <b>{vehicleDesc}</b> — Placa: <b>{plate}</b> — Chassi: <b>{chassis}</b> — Ano: <b>{year}</b>
+            </span>
+            <span className="prom-ref-line">
+              Data da venda: <b>{saleDate || '—'}</b> — Valor total: <b>R$ {totalValue || '—'}</b>
+              {financedValue ? <> — Financiado: <b>R$ {financedValue}</b></> : null}
+              {financeHistory ? <> — Ref.: <b>{financeHistory}</b></> : null}
+            </span>
+          </div>
 
           <div className="prom-footer-row">
             <div className="prom-emitente">
@@ -126,15 +162,28 @@ const PromissoryManager = ({ transaction, storeData }) => {
   };
 
   const customer = data.customer || {};
-  const total = parseInt(promissory.installments) || 1;
+  const vehicle = data.vehicle || {};
+  const total = parseInt(String(promissory.installments), 10) || 1;
 
-  // Calcula valor com juros se necessário
+  const saleDate = data.saleDate || data.sale?.date || '';
+  const totalValueStr = data.totalValue || data.sale?.totalValue || '';
+  const financedStr = data.financedValue ?? data.sale?.financedValue ?? '';
+  const financeHistory = data.financeHistory || data.sale?.financeHistory || '';
+
+  const valorBaseFinanciado = (() => {
+    const f = parseCurrencyBR(financedStr);
+    if (f > 0) return f;
+    const inst = parseCurrencyBR(promissory.installmentValue);
+    if (inst > 0 && total > 0) return inst * total;
+    return 0;
+  })();
+
   let finalValue = promissory.installmentValue || '0,00';
-  if (promissory.applyInterest && promissory.interestRate && promissory.installmentValue) {
-    const base = parseFloat((promissory.installmentValue || '').replace(/\./g, '').replace(',', '.'));
-    if (!isNaN(base)) {
-      const rate = parseFloat(promissory.interestRate);
-      finalValue = (base + base * rate / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  if (promissory.applyInterest && promissory.interestRate != null && String(promissory.interestRate) !== '') {
+    const rate = parseFloat(String(promissory.interestRate).replace(',', '.'));
+    if (valorBaseFinanciado > 0 && !Number.isNaN(rate) && rate >= 0) {
+      const num = installmentWithInterestFormula(valorBaseFinanciado, rate, total);
+      finalValue = formatCurrencyBR(num);
     }
   }
 
@@ -355,6 +404,33 @@ const PromissoryManager = ({ transaction, storeData }) => {
           min-height: 14px;
           font-weight: 600;
         }
+        .prom-referencia {
+          margin-top: 4px;
+          border: 1px solid #333;
+          background: #fafafa;
+          padding: 3px 6px;
+          font-size: 6px;
+          line-height: 1.45;
+          color: #111;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .prom-ref-title {
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-size: 6.5px;
+          border-bottom: 1px dashed #999;
+          padding-bottom: 2px;
+          margin-bottom: 1px;
+        }
+        .prom-ref-line {
+          display: block;
+        }
+        .prom-ref-line b {
+          font-weight: 800;
+        }
         .prom-footer-row {
           display: flex;
           align-items: flex-end;
@@ -455,6 +531,11 @@ const PromissoryManager = ({ transaction, storeData }) => {
                 payableAt={promissory.payableAt}
                 customer={customer}
                 storeData={storeData}
+                vehicle={vehicle}
+                saleDate={saleDate}
+                totalValue={totalValueStr}
+                financedValue={financedStr}
+                financeHistory={financeHistory}
               />
             ))}
           </div>
