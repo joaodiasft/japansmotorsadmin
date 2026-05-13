@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit, Trash2, Save, X, User } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Save, X, User, MessageCircle } from 'lucide-react';
+import { buildWhatsAppChatUrl } from '../utils/whatsapp.js';
 
 const CustomerManager = ({ customers, onSave, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +46,7 @@ const CustomerManager = ({ customers, onSave, onDelete }) => {
   };
 
   if (isFormOpen) {
+    const phoneWaUrl = buildWhatsAppChatUrl(formData.phone);
     return (
       <div className="max-w-4xl mx-auto p-6 mt-6 bg-white rounded-xl shadow border border-gray-200">
         <div className="flex justify-between items-center mb-6 pb-4 border-b">
@@ -126,6 +128,17 @@ const CustomerManager = ({ customers, onSave, onDelete }) => {
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Telefone / WhatsApp</label>
             <input name="phone" value={formData.phone || ''} onChange={handleChange} className="w-full border p-2 rounded" placeholder="(62) 99999-9999" />
+            {phoneWaUrl && (
+              <a
+                href={phoneWaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-800 hover:underline"
+              >
+                <MessageCircle size={18} className="text-green-600 shrink-0" />
+                Abrir WhatsApp com mensagem da Japan Motors
+              </a>
+            )}
           </div>
 
           <div>
@@ -182,11 +195,28 @@ const CustomerManager = ({ customers, onSave, onDelete }) => {
                   {searchTerm ? 'Nenhum resultado para a busca.' : 'Nenhum cliente cadastrado ainda.'}
                 </td></tr>
               ) : (
-                filteredCustomers.map((c) => (
+                filteredCustomers.map((c) => {
+                  const wa = buildWhatsAppChatUrl(c.phone);
+                  return (
                   <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4 font-medium text-gray-800">{c.name}</td>
                     <td className="p-4 text-gray-600 font-mono text-sm">{c.cpf}</td>
-                    <td className="p-4 text-gray-600">{c.phone}</td>
+                    <td className="p-4 text-gray-600">
+                      {wa ? (
+                        <a
+                          href={wa}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-green-700 font-medium hover:text-green-900 hover:underline"
+                          title="Conversar no WhatsApp"
+                        >
+                          <MessageCircle size={17} className="text-green-600 shrink-0" aria-hidden />
+                          <span>{c.phone}</span>
+                        </a>
+                      ) : (
+                        <span>{c.phone || '—'}</span>
+                      )}
+                    </td>
                     <td className="p-4 text-gray-600">{c.city}{c.state ? `/${c.state}` : ''}</td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
@@ -195,7 +225,8 @@ const CustomerManager = ({ customers, onSave, onDelete }) => {
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
